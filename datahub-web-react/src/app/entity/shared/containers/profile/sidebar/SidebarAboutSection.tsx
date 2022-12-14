@@ -139,6 +139,9 @@ export const SidebarAboutSection = ({ properties }: { properties?: Props }) => {
                     </Typography.Paragraph>
                 </>
             )}
+            <a href="https://form.asana.com/?k=JIRP6i6SGyuOu-VTLUuaJg&d=2740660799089" target="_blank" rel="noreferrer">
+                 {isUntouched && <SpacedButton> Request Access </SpacedButton>}
+            </a>
         </div>
     );
 };

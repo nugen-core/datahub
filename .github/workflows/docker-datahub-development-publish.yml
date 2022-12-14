@@ -1,0 +1,43 @@
+name: Docker DataHub Development Publish
+
+on:
+  push:
+    tags:
+      - dlv*.*.*
+    paths:
+      - docker/datahub-frontend/**
+      - docker/datahub-gms/**
+      - docker/elasticsearch/**
+      - docker/kafka-setup/**
+      - docker/mysql/**
+      - docker/neo4j/**
+      - docker/docker-compose.yml
+      - datahub-web-react/**
+      - .github/workflows/docker-datahub-development-publish.yml
+      - Makefile
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+
+jobs:
+  docker-datahub-publish:
+    runs-on: ubuntu-20.04
+    environment: terraform
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ./.github/actions/setup-aws-credentials
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-west-1
+
+    - name: Pull DataHub Docker Image
+      run: make datahub-pull-latest-image RESOURCE_NAME_PREFIX=nugen-dev-tf-dcbb
+      continue-on-error: true
+
+    - name: Build DataHub Docker Image
+      run: make datahub-build
+
+    - name: Push DataHub Docker Image
+      run: make datahub-push-image RESOURCE_NAME_PREFIX=nugen-dev-tf-dcbb VERSION=${{ github.ref_name }}
